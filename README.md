@@ -41,3 +41,17 @@ VALUES ('<CALLSIGN>', <FREQ>, '<BAND>', 'US',
 ON CONFLICT (callsign, frequency, broadcast_band) DO UPDATE
   SET logo_url = EXCLUDED.logo_url, is_radiodns = TRUE, updated_at = CURRENT_TIMESTAMP;
 ```
+
+## Image preparation
+
+The app renders logos in a square thumbnail with BoxFit.cover — any wide or
+tall source will get its sides/top cropped. Pad the image to **1:1 aspect
+ratio** (white background, centered) before committing. One-liner:
+
+```python
+from PIL import Image
+img = Image.open(src); w,h = img.size; s = max(w,h)
+canvas = Image.new("RGB", (s,s), (255,255,255))
+canvas.paste(img, ((s-w)//2, (s-h)//2))
+canvas.save(dst, quality=92, optimize=True)
+```
